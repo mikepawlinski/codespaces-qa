@@ -10,7 +10,7 @@ if the result is right.
 
 Our existing test for this flow (tests/take-assessment.spec.ts) is green.
 
-Your task (45 minutes, use your AI agent however you like):
+Your task (30 minutes, use your AI agent however you like):
 1. Tell us why the existing test did not catch this.
 2. Reproduce what the candidate saw and show where it breaks, with tests based on REQUIREMENTS.md.
 3. Leave the suite stable enough to run in CI with 4 workers.

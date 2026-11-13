@@ -19,7 +19,7 @@ Playwright runs Chromium with 4 workers, no retries, and keeps a trace for faile
 
 ## Your task
 
-A customer escalation: a candidate says they passed an assessment, but the result shows Fail. The existing test for this flow is green. You have 45 minutes and may use your AI agent however you like. The interviewer plays the product owner, so ask them anything.
+A customer escalation: a candidate says they passed an assessment, but the result shows Fail. The existing test for this flow is green. You have 30 minutes and may use your AI agent however you like. The interviewer plays the product owner, so ask them anything.
 
 1. Explain why the existing test did not catch the problem.
 2. Reproduce what the candidate saw and show where it breaks, with tests based on `REQUIREMENTS.md`.
