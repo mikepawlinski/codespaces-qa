@@ -1,5 +1,10 @@
 import { expect, type APIRequestContext } from '@playwright/test';
 
+// The token returned by invite() identifies the attempt everywhere: the candidate
+// page is /take/<token> and the attempt endpoints are /api/attempts/<token>.
+// Timestamps are ISO 8601 strings. Recruiter calls need the key, which the
+// Playwright config sends on every request; attempt calls do not check it.
+
 type Question = {
   id: string;
   options: { id: string; label: string }[];
@@ -8,10 +13,32 @@ type Question = {
 
 type Assessment = { id: string };
 
+type SavedAnswer = { optionId: string; savedAt: string };
+
+// GET /api/attempts/:token. startedAt and deadline are absent until the attempt
+// is started, and questions is empty until then. Questions have no correctOptionId.
+export type AttemptState = {
+  token: string;
+  title: string;
+  status: 'invited' | 'in_progress' | 'submitted';
+  timeLimitSeconds: number;
+  questionCount: number;
+  serverTime: string;
+  startedAt?: string;
+  deadline?: string;
+  questions: { id: string; text: string; options: { id: string; label: string }[] }[];
+  answers: Record<string, SavedAnswer>;
+};
+
+// GET /api/attempts/:token/result (recruiter)
 type AttemptResult = {
   score: number;
   passed: boolean;
-  answers: Record<string, { optionId: string; savedAt: string }>;
+  endedBy: 'candidate' | 'timeout';
+  startedAt: string;
+  deadline: string;
+  submittedAt: string;
+  answers: Record<string, SavedAnswer>;
 };
 
 type AssessmentSettings = {
@@ -66,7 +93,7 @@ export const submitAnswersViaApi = async (
     passingScore: 67,
   });
   const { token } = await invite(api, assessment.id);
-  expect((await api.post(`/api/attempts/${token}/start`)).ok()).toBeTruthy();
+  await startAttempt(api, token);
 
   for (const [index, question] of assessment.questions.entries()) {
     const optionId =
@@ -84,4 +111,19 @@ export const submitAnswersViaApi = async (
   const result = await api.get(`/api/attempts/${token}/result`);
   expect(result.ok()).toBeTruthy();
   return result.json();
+};
+
+export const startAttempt = async (
+  api: APIRequestContext,
+  token: string,
+): Promise<{ startedAt: string; deadline: string; serverTime: string }> => {
+  const response = await api.post(`/api/attempts/${token}/start`);
+  expect(response.ok()).toBeTruthy();
+  return response.json();
+};
+
+export const getAttemptState = async (api: APIRequestContext, token: string): Promise<AttemptState> => {
+  const response = await api.get(`/api/attempts/${token}`);
+  expect(response.ok()).toBeTruthy();
+  return response.json();
 };
