@@ -10,7 +10,7 @@ Locally:
 
 ```sh
 pnpm install
-pnpm exec playwright install chromium
+pnpm exec playwright install --with-deps chromium
 cp .env.example .env   # fill in BASE_URL and ADMIN_API_KEY
 pnpm test
 ```
